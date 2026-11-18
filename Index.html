@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Surf Strength Flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#08161f;--panel:#0f2533;--panel2:#132d3e;--line:#1e3d52;
+  --text:#ecf5f8;--muted:#86a8b8;
+  --work:#2ec4b6;--rest:#f4a259;--prep:#6aa9ff;--done:#a7e08a;
+  --accent:var(--prep);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,sans-serif;-webkit-tap-highlight-color:transparent}
+body{min-height:100vh;display:flex;justify-content:center;
+  background:radial-gradient(120% 60% at 50% 0%, color-mix(in srgb,var(--accent) 14%, transparent), transparent 70%), var(--bg);
+  transition:background .6s}
+button{font:inherit;color:inherit;cursor:pointer}
+.app{width:100%;max-width:460px;padding:14px 18px 48px}
+
+header{display:flex;justify-content:space-between;align-items:center;gap:10px}
+h1{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;letter-spacing:.08em;text-transform:uppercase}
+h1 span{color:var(--accent);transition:color .4s}
+.pill{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:12px;font-weight:500;color:var(--muted)}
+
+.overall{margin-top:14px}
+.overall .row{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;margin-bottom:6px}
+.segs{display:flex;gap:3px;height:6px}
+.seg{position:relative;flex:1;background:var(--line);border-radius:3px;overflow:hidden}
+.seg>i{position:absolute;inset:0;width:0;background:var(--accent);transition:width .25s linear, background .4s}
+.seglabels{display:flex;gap:3px;margin-top:5px}
+.seglabels div{flex:1;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seglabels div.on{color:var(--text);font-weight:600}
+
+.stage{text-align:center;margin-top:22px}
+.label{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:600;transition:color .4s}
+.name{font-family:'Barlow Condensed',sans-serif;font-size:40px;font-weight:700;line-height:1.02;margin-top:6px;min-height:82px;display:flex;align-items:center;justify-content:center;text-wrap:balance}
+.side{display:inline-block;font-size:13px;font-family:Inter,sans-serif;font-weight:600;letter-spacing:.1em;text-transform:uppercase;background:color-mix(in srgb,var(--accent) 20%,transparent);color:var(--accent);border-radius:6px;padding:3px 8px;margin-top:4px}
+
+.ringwrap{position:relative;width:250px;height:250px;margin:14px auto 0}
+.ringwrap svg{width:100%;height:100%;transform:rotate(-90deg)}
+.track{fill:none;stroke:var(--line);stroke-width:12}
+.prog{fill:none;stroke:var(--accent);stroke-width:12;stroke-linecap:round;transition:stroke .4s}
+.time{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.time b{font-family:'Barlow Condensed',sans-serif;font-size:88px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.time small{font-size:12px;color:var(--muted);margin-top:4px;letter-spacing:.06em}
+.ringwrap.pulse b{animation:pulse .5s ease}
+@keyframes pulse{0%{transform:scale(1.12);color:var(--accent)}100%{transform:scale(1)}}
+
+.cue{margin:14px auto 0;max-width:340px;font-size:15px;line-height:1.45;color:#cfe2ea;min-height:44px}
+
+.controls{display:flex;align-items:center;justify-content:center;gap:26px;margin-top:20px}
+.ctl{width:56px;height:56px;border-radius:50%;background:var(--panel);border:1px solid var(--line);display:grid;place-items:center}
+.ctl svg{width:22px;height:22px;fill:var(--text)}
+.play{width:84px;height:84px;border:none;background:var(--accent);box-shadow:0 8px 30px color-mix(in srgb,var(--accent) 40%,transparent);transition:background .4s, transform .1s}
+.play:active,.ctl:active{transform:scale(.95)}
+.play svg{width:34px;height:34px;fill:#06202a}
+
+.next{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left}
+.next .k{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.next .v{font-weight:600;font-size:16px;margin-top:2px}
+.next .d{font-family:'Barlow Condensed',sans-serif;font-size:22px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+.plan{margin-top:26px}
+.plan summary{list-style:none;display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:10px 2px;cursor:pointer;border-top:1px solid var(--line)}
+.plan summary::-webkit-details-marker{display:none}
+.plan summary::after{content:'＋';font-size:16px}
+.plan[open] summary::after{content:'－'}
+.bh{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin:16px 2px 6px;display:flex;justify-content:space-between}
+.bh span{color:var(--muted);font-weight:500;font-size:15px}
+.item{width:100%;display:flex;align-items:center;gap:10px;background:transparent;border:none;border-radius:10px;padding:9px 10px;text-align:left;font-size:14px}
+.item .dot{width:8px;height:8px;border-radius:50%;background:var(--line);flex:none}
+.item.rest{color:var(--muted)}
+.item .r{font-size:11px;color:var(--muted);margin-left:auto;white-space:nowrap}
+.item .t{font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px;width:40px;text-align:right;flex:none}
+.item.past{opacity:.45}
+.item.past .dot{background:var(--muted)}
+.item.cur{background:var(--panel2)}
+.item.cur .dot{background:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 25%,transparent)}
+.note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:16px;text-align:center}
+.done .name{color:var(--done)}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header>
+    <h1>Surf <span>Strength</span> Flow</h1>
+    <button class="pill" id="soundBtn" aria-label="Sound mode">Voice + beeps</button>
+  </header>
+
+  <div class="overall">
+    <div class="row"><span id="elapsed">0:00 elapsed</span><span id="stepNo"></span><span id="left">45:00 left</span></div>
+    <div class="segs" id="segs"></div>
+    <div class="seglabels" id="seglabels"></div>
+  </div>
+
+  <div class="stage" id="stage">
+    <div class="label" id="label">Get ready</div>
+    <div class="name" id="name"><div><div id="nameText"></div><div id="sideTag"></div></div></div>
+    <div class="ringwrap" id="ringwrap">
+      <svg viewBox="0 0 260 260" aria-hidden="true">
+        <circle class="track" cx="130" cy="130" r="118"/>
+        <circle class="prog" id="prog" cx="130" cy="130" r="118"/>
+      </svg>
+      <div class="time"><b id="time">0:10</b><small id="timeSub">TAP PLAY TO START</small></div>
+    </div>
+    <div class="cue" id="cue"></div>
+
+    <div class="controls">
+      <button class="ctl" id="prevBtn" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
+      <button class="ctl play" id="playBtn" aria-label="Play"><svg viewBox="0 0 24 24" id="playIcon"><path d="M7 4.5v15l13-7.5z"/></svg></button>
+      <button class="ctl" id="nextBtn" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
+    </div>
+
+    <div class="next" id="nextCard">
+      <div><div class="k">Up next</div><div class="v" id="nextName"></div></div>
+      <div class="d" id="nextDur"></div>
+    </div>
+  </div>
+
+  <details class="plan" id="plan">
+    <summary>Full workout · tap any step to jump</summary>
+    <div id="list"></div>
+  </details>
+  <p class="note">Rep-based moves have estimated times. If you finish early, tap skip.<br>Keep your phone's screen awake while you train.</p>
+</div>
+
+<script>
+/* ---------- Workout data ---------- */
+const S = [];
+function add(block, name, dur, cue, o = {}) {
+  S.push({ block, name, dur, cue, kind: o.kind || 'work', side: o.side || null, round: o.round || null, rounds: o.rounds || null });
+}
+const B0 = 'Get ready', B1 = 'Warm-up', B2 = 'Activation', B3 = 'Yoga flow', B4 = 'Power', B5 = 'Core', B6 = 'Cooldown';
+
+add(B0, 'Get ready', 10, 'Grab some floor space. First up: cat-cow.', { kind: 'prep' });
+
+// Warm-up: 3 rounds
+for (let r = 1; r <= 3; r++) {
+  const o = { round: r, rounds: 3 };
+  add(B1, 'Cat-cow', 30, '10 reps. Arch on the inhale, round on the exhale.', o);
+  add(B1, 'Tabletop hold', 30, 'Hands under shoulders, knees under hips. Brace the core.', o);
+  add(B1, "Child's pose", 30, 'Sink the hips back and breathe.', o);
+  add(B1, 'Plank', 30, 'Long line from head to heels. Straight into down dog.', o);
+  add(B1, 'Down dog', 30, 'Hips high, press the chest toward your thighs. Straight into cobra.', o);
+  add(B1, 'Cobra pose', 30, 'Lift the chest, shoulders away from your ears.', o);
+  add(B1, 'Rest', 10, r < 3 ? 'Quick reset.' : 'Activation is next.', { ...o, kind: 'rest' });
+}
+
+// Activation: 3 rounds
+for (let r = 1; r <= 3; r++) {
+  const o = { round: r, rounds: 3 };
+  add(B2, 'Down dog', 10, 'Quick hold.', o);
+  add(B2, 'Plank', 10, 'Quick hold.', o);
+  add(B2, 'Cobra pose', 10, 'Quick hold.', o);
+  add(B2, 'Cobra half frog', 20, '5 reps. Prop up on your forearms and draw the foot toward your hip.', { ...o, side: 'Right leg' });
+  add(B2, 'Cobra half frog', 20, '5 reps. Prop up on your forearms and draw the foot toward your hip.', { ...o, side: 'Left leg' });
+  add(B2, 'Chaturanga', 25, '5 reps. Elbows tight to the ribs, lower slowly.', o);
+  add(B2, 'Rest', 10, r < 3 ? 'Quick reset.' : 'Yoga flow is next.', { ...o, kind: 'rest' });
+}
+
+// Yoga flow: right side, then opposite
+function flow(r, R, L) {
+  const o = { round: r, rounds: 2 };
+  const lo = s => s.toLowerCase();
+  add(B3, 'Plank', 20, 'Strong and steady.', o);
+  add(B3, 'Side plank', 20, 'Stack the feet, hips high.', { ...o, side: R + ' side' });
+  add(B3, 'Plank', 10, 'Rotate back to center.', o);
+  add(B3, 'Side plank', 20, 'Stack the feet, hips high.', { ...o, side: L + ' side' });
+  add(B3, 'Plank', 10, 'Back to center.', o);
+  add(B3, 'Lizard pose', 30, `Step your ${lo(R)} foot outside your ${lo(R)} hand. Sink the hips.`, { ...o, side: R + ' leg' });
+  add(B3, 'Lizard twist', 30, `Keep the ${lo(R)} foot forward and reach your ${lo(L)} arm up.`, { ...o, side: L + ' arm up' });
+  add(B3, 'Lunge hold', 30, 'Back knee off the floor, hips square.', { ...o, side: R + ' leg' });
+  add(B3, 'Warrior 2', 30, 'Front knee over the ankle, gaze past the front hand.', { ...o, side: R + ' leg front' });
+  add(B3, 'Skandasana', 10, `Shift into a deep side lunge on your ${lo(L)} leg.`, { ...o, side: 'On ' + lo(L) + ' leg' });
+  add(B3, 'Warrior 3', 30, 'Hinge forward, back leg long, hips level.', { ...o, side: 'On ' + lo(R) + ' leg' });
+  add(B3, 'Tree pose', 30, 'Foot on the calf or thigh, never the knee.', { ...o, side: 'On ' + lo(R) + ' leg' });
+  add(B3, 'Squats', 30, '10 reps.', o);
+  add(B3, 'Down dog', 30, r === 1 ? 'Breathe. Next, the same flow on the other side.' : 'Breathe. Power work is next.', o);
+  add(B3, 'Rest', 10, r === 1 ? 'Switch sides.' : 'Power work is next.', { ...o, kind: 'rest' });
+}
+flow(1, 'Right', 'Left');
+flow(2, 'Left', 'Right');
+
+// Power: 3 rounds
+for (let r = 1; r <= 3; r++) {
+  const o = { round: r, rounds: 3 };
+  add(B4, 'Mountain climbers', 30, '10 each side. Drive the knees, keep the hips low.', o);
+  add(B4, 'Pop-up pushups', 80, '10 each side.', o);
+  add(B4, 'Prone Y-T-W raises', 30, '5 reps of each letter. Thumbs up, squeeze the shoulder blades together.', o);
+  add(B4, 'Superman hold', 30, 'Arms and legs off the floor. Squeeze the glutes.', o);
+  add(B4, 'Rest', 10, r < 3 ? 'Shake it out.' : 'Breathe. Core is next.', { ...o, kind: 'rest' });
+}
+
+// Core: 3 rounds
+for (let r = 1; r <= 3; r++) {
+  const o = { round: r, rounds: 3 };
+  add(B5, 'Leg raises', 30, '20 reps. Low back stays down.', o);
+  add(B5, 'Bicycles', 40, '20 reps. Rotate from the ribs.', o);
+  add(B5, 'Dead bugs', 30, '20 reps. Slow, opposite arm and leg.', o);
+  add(B5, 'Single-leg bridge lifts', 30, '20 reps.', { ...o, side: 'Right leg' });
+  add(B5, 'Single-leg bridge lifts', 30, '20 reps.', { ...o, side: 'Left leg' });
+  add(B5, 'Rest', 10, r < 3 ? 'Quick reset.' : 'Cooldown stretch is next.', { ...o, kind: 'rest' });
+}
+
+// Cooldown stretch flow
+add(B6, 'Happy baby', 45, 'Grab the outsides of your feet and rock gently side to side.');
+add(B6, 'Cross-leg glute stretch', 30, 'On your back, cross the ankle over the opposite knee and pull the thigh in.', { side: 'Right leg' });
+add(B6, 'Cross-leg glute stretch', 30, 'On your back, cross the ankle over the opposite knee and pull the thigh in.', { side: 'Left leg' });
+add(B6, 'Butterfly fold', 60, 'Sit up, soles of the feet together, knees wide. Fold forward over your feet.');
+add(B6, 'Forward fold', 55, 'Legs long in front of you. Hinge from the hips and let the hamstrings release.');
+add(B6, 'Arm stretch', 25, 'Pull the arm across the chest, then reach it overhead and bend for the triceps.', { side: 'Right arm' });
+add(B6, 'Arm stretch', 25, 'Pull the arm across the chest, then reach it overhead and bend for the triceps.', { side: 'Left arm' });
+add(B6, "Child's pose", 55, 'Arms long, forehead down. Slow exhales.');
+add(B6, 'Lie on your back', 60, 'Let everything go. Arms by your sides, eyes closed, just breathe.');
+
+const BLOCKS = [B1, B2, B3, B4, B5, B6];
+const TOTAL = S.reduce((a, s) => a + s.dur, 0);
+const startOf = []; { let t = 0; S.forEach(s => { startOf.push(t); t += s.dur; }); }
+const blockRange = BLOCKS.map(b => {
+  const ids = S.map((s, i) => s.block === b ? i : -1).filter(i => i >= 0);
+  const st = startOf[ids[0]], en = startOf[ids.at(-1)] + S[ids.at(-1)].dur;
+  return { b, st, en };
+});
+
+/* ---------- State ---------- */
+let idx = 0, remaining = S[0].dur * 1000, running = false, endAt = 0, started = false, finished = false, lastBeep = null;
+
+/* ---------- Sound ---------- */
+const MODES = ['Voice + beeps', 'Beeps only', 'Muted'];
+let mode = 0;
+try { const m = parseInt(localStorage.getItem('surfflow-mode')); if (m >= 0 && m < 3) mode = m; } catch (e) {}
+let ac = null;
+function ensureAudio() {
+  try {
+    if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
+    if (ac.state === 'suspended') ac.resume();
+  } catch (e) {}
+}
+function beep(freq = 660, len = 0.12, vol = 0.25) {
+  if (mode === 2 || !ac) return;
+  try {
+    const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime;
+    o.type = 'sine'; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+    o.connect(g).connect(ac.destination); o.start(t); o.stop(t + len + 0.02);
+  } catch (e) {}
+}
+function speak(text) {
+  if (mode !== 0) return;
+  try {
+    if (!('speechSynthesis' in window)) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text); u.rate = 1.05;
+    speechSynthesis.speak(u);
+  } catch (e) {}
+}
+function announce() {
+  const s = S[idx];
+  if (s.kind === 'rest') {
+    const n = S[idx + 1];
+    speak('Rest. Up next, ' + (n ? n.name + (n.side ? ', ' + n.side.toLowerCase() : '') : 'finish'));
+  } else if (s.kind === 'prep') {
+    speak('Get ready. First up, ' + S[1].name);
+  } else {
+    speak(s.name + (s.side ? ', ' + s.side.toLowerCase() : ''));
+  }
+}
+
+/* ---------- Wake lock ---------- */
+let wl = null;
+async function wake() { try { if ('wakeLock' in navigator && !wl) { wl = await navigator.wakeLock.request('screen'); wl.addEventListener('release', () => wl = null); } } catch (e) {} }
+function sleep() { try { wl && wl.release(); } catch (e) {} wl = null; }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && running) wake(); });
+
+/* ---------- Engine ---------- */
+function enterStep() {
+  lastBeep = null;
+  beep(S[idx].kind === 'rest' ? 520 : 990, 0.35, 0.3);
+  announce();
+  const rw = document.getElementById('ringwrap');
+  rw.classList.remove('pulse'); void rw.offsetWidth; rw.classList.add('pulse');
+}
+function tick() {
+  if (!running) return;
+  const now = performance.now();
+  let rem = endAt - now, changed = false;
+  while (rem <= 0) {
+    if (idx >= S.length - 1) { finish(); return; }
+    idx++; endAt += S[idx].dur * 1000; rem = endAt - now; changed = true;
+  }
+  remaining = rem;
+  if (changed) enterStep();
+  const sec = Math.ceil(rem / 1000);
+  if (sec <= 3 && sec >= 1 && sec !== lastBeep) { lastBeep = sec; beep(660, 0.12); }
+  render();
+}
+function play() {
+  ensureAudio();
+  if (finished) reset();
+  running = true;
+  endAt = performance.now() + remaining;
+  if (!started) { started = true; announce(); }
+  wake(); render();
+}
+function pause() {
+  running = false; remaining = Math.max(0, endAt - performance.now());
+  try { speechSynthesis.cancel(); } catch (e) {}
+  sleep(); render();
+}
+function goTo(i) {
+  idx = Math.max(0, Math.min(S.length - 1, i));
+  finished = false;
+  remaining = S[idx].dur * 1000;
+  if (running) { endAt = performance.now() + remaining; enterStep(); } else lastBeep = null;
+  render();
+}
+function finish() {
+  running = false; finished = true; remaining = 0; idx = S.length - 1;
+  beep(880, 0.2); setTimeout(() => beep(1175, 0.4), 220);
+  speak('Workout complete. Nice work.');
+  sleep(); render();
+}
+function reset() { idx = 0; remaining = S[0].dur * 1000; finished = false; started = false; }
+
+/* ---------- UI ---------- */
+const $ = id => document.getElementById(id);
+const fmt = s => { s = Math.max(0, Math.ceil(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+const C = 2 * Math.PI * 118;
+$('prog').style.strokeDasharray = C;
+
+// Segments
+blockRange.forEach(r => {
+  const seg = document.createElement('div'); seg.className = 'seg'; seg.style.flex = (r.en - r.st);
+  seg.innerHTML = '<i></i>'; $('segs').appendChild(seg);
+  const l = document.createElement('div'); l.textContent = r.b.split(' ')[0]; l.style.flex = (r.en - r.st);
+  $('seglabels').appendChild(l);
+});
+
+// Plan list
+(function buildList() {
+  const list = $('list'); let curBlock = null;
+  S.forEach((s, i) => {
+    if (s.kind === 'prep') return;
+    if (s.block !== curBlock) {
+      curBlock = s.block;
+      const r = blockRange.find(x => x.b === s.block);
+      const h = document.createElement('div'); h.className = 'bh';
+      h.innerHTML = `${s.block}<span>${fmt(r.en - r.st)}</span>`; list.appendChild(h);
+    }
+    const b = document.createElement('button');
+    b.className = 'item' + (s.kind === 'rest' ? ' rest' : ''); b.dataset.i = i;
+    b.innerHTML = `<span class="dot"></span><span>${s.name}${s.side ? ' · ' + s.side : ''}</span>` +
+      `<span class="r">${s.round ? 'R' + s.round : ''}</span><span class="t">${fmt(s.dur)}</span>`;
+    b.onclick = () => { ensureAudio(); goTo(i); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+    list.appendChild(b);
+  });
+})();
+
+function render() {
+  const s = S[idx];
+  const kind = finished ? 'done' : s.kind;
+  document.documentElement.style.setProperty('--accent', `var(--${kind === 'done' ? 'done' : kind})`);
+  $('stage').classList.toggle('done', finished);
+
+  if (finished) {
+    $('label').textContent = 'Session complete';
+    $('nameText').textContent = 'Nice work 🤙';
+    $('sideTag').innerHTML = '';
+    $('cue').textContent = 'Hydrate, and go find some waves.';
+  } else {
+    $('label').textContent = s.kind === 'prep' ? 'Get ready' :
+      s.block + (s.round ? ` · Round ${s.round}/${s.rounds}` : '');
+    $('nameText').textContent = s.name;
+    $('sideTag').innerHTML = s.side ? `<span class="side">${s.side}</span>` : '';
+    $('cue').textContent = s.cue;
+  }
+
+  const durMs = s.dur * 1000;
+  $('time').textContent = fmt(remaining / 1000);
+  $('timeSub').textContent = finished ? 'DONE' : (!started ? 'TAP PLAY TO START' : running ? (s.kind === 'rest' ? 'REST' : s.kind === 'prep' ? 'STARTING' : 'WORK') : 'PAUSED');
+  $('prog').style.strokeDashoffset = finished ? C : C * (1 - remaining / durMs);
+
+  const n = S[idx + 1];
+  $('nextCard').style.visibility = finished ? 'hidden' : 'visible';
+  $('nextName').textContent = n ? n.name + (n.side ? ' · ' + n.side : '') : 'Finish';
+  $('nextDur').textContent = n ? fmt(n.dur) : '🏁';
+
+  $('playIcon').innerHTML = running
+    ? '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>'
+    : finished ? '<path d="M12 5V1L7 6l5 5V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/>' : '<path d="M7 4.5v15l13-7.5z"/>';
+  $('playBtn').setAttribute('aria-label', running ? 'Pause' : 'Play');
+
+  const elapsed = finished ? TOTAL : startOf[idx] + (s.dur - remaining / 1000);
+  $('elapsed').textContent = fmt(elapsed) + ' elapsed';
+  $('left').textContent = fmt(TOTAL - elapsed) + ' left';
+  const workIdx = S.slice(0, idx + 1).filter(x => x.kind === 'work').length;
+  $('stepNo').textContent = `${workIdx}/${S.filter(x => x.kind === 'work').length} moves`;
+
+  const segs = $('segs').children, labs = $('seglabels').children;
+  blockRange.forEach((r, k) => {
+    const p = Math.max(0, Math.min(1, (elapsed - r.st) / (r.en - r.st)));
+    segs[k].firstChild.style.width = (p * 100) + '%';
+    labs[k].classList.toggle('on', !finished && s.block === r.b);
+  });
+
+  document.querySelectorAll('.item').forEach(el => {
+    const i = +el.dataset.i;
+    el.classList.toggle('cur', !finished && i === idx);
+    el.classList.toggle('past', finished || i < idx);
+  });
+  $('soundBtn').textContent = MODES[mode];
+}
+
+$('playBtn').onclick = () => running ? pause() : play();
+$('nextBtn').onclick = () => { ensureAudio(); if (idx < S.length - 1) goTo(idx + 1); else if (running) finish(); };
+$('prevBtn').onclick = () => {
+  ensureAudio();
+  const elapsedInStep = S[idx].dur * 1000 - remaining;
+  goTo(elapsedInStep > 3000 || idx === 0 ? idx : idx - 1);
+};
+$('soundBtn').onclick = () => {
+  mode = (mode + 1) % 3;
+  try { localStorage.setItem('surfflow-mode', mode); } catch (e) {}
+  if (mode === 2) try { speechSynthesis.cancel(); } catch (e) {}
+  ensureAudio(); render();
+};
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space') { e.preventDefault(); running ? pause() : play(); }
+  if (e.code === 'ArrowRight') $('nextBtn').click();
+  if (e.code === 'ArrowLeft') $('prevBtn').click();
+});
+
+setInterval(tick, 100);
+render();
+</script>
+</body>
+</html>
