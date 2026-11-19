@@ -146,8 +146,8 @@ for (let r = 1; r <= 3; r++) {
   add(B1, 'Tabletop hold', 30, 'Hands under shoulders, knees under hips. Brace the core.', o);
   add(B1, "Child's pose", 30, 'Sink the hips back and breathe.', o);
   add(B1, 'Plank', 30, 'Long line from head to heels. Straight into down dog.', o);
-  add(B1, 'Down dog', 30, 'Hips high, press the chest toward your thighs. Straight into cobra.', o);
-  add(B1, 'Cobra pose', 30, 'Lift the chest, shoulders away from your ears.', o);
+  add(B1, 'Down dog', 30, 'Hips high, press the chest toward your thighs. Straight into up dog.', o);
+  add(B1, 'Up dog', 30, 'Press through the hands, thighs off the floor, chest open.', o);
   add(B1, 'Rest', 10, r < 3 ? 'Quick reset.' : 'Activation is next.', { ...o, kind: 'rest' });
 }
 
@@ -156,7 +156,7 @@ for (let r = 1; r <= 3; r++) {
   const o = { round: r, rounds: 3 };
   add(B2, 'Down dog', 10, 'Quick hold.', o);
   add(B2, 'Plank', 10, 'Quick hold.', o);
-  add(B2, 'Cobra pose', 10, 'Quick hold.', o);
+  add(B2, 'Up dog', 10, 'Quick hold.', o);
   add(B2, 'Cobra half frog', 20, '5 reps. Prop up on your forearms and draw the foot toward your hip.', { ...o, side: 'Right leg' });
   add(B2, 'Cobra half frog', 20, '5 reps. Prop up on your forearms and draw the foot toward your hip.', { ...o, side: 'Left leg' });
   add(B2, 'Chaturanga', 25, '5 reps. Elbows tight to the ribs, lower slowly.', o);
@@ -173,7 +173,7 @@ function flow(r, R, L) {
   add(B3, 'Side plank', 20, 'Stack the feet, hips high.', { ...o, side: L + ' side' });
   add(B3, 'Plank', 10, 'Back to center.', o);
   add(B3, 'Lizard pose', 30, `Step your ${lo(R)} foot outside your ${lo(R)} hand. Sink the hips.`, { ...o, side: R + ' leg' });
-  add(B3, 'Lizard twist', 30, `Keep the ${lo(R)} foot forward and reach your ${lo(L)} arm up.`, { ...o, side: L + ' arm up' });
+  add(B3, 'Lizard twist', 30, `Keep the ${lo(R)} foot forward and reach your ${lo(R)} arm up.`, { ...o, side: R + ' arm up' });
   add(B3, 'Lunge hold', 30, 'Back knee off the floor, hips square.', { ...o, side: R + ' leg' });
   add(B3, 'Warrior 2', 30, 'Front knee over the ankle, gaze past the front hand.', { ...o, side: R + ' leg front' });
   add(B3, 'Skandasana', 10, `Shift into a deep side lunge on your ${lo(L)} leg.`, { ...o, side: 'On ' + lo(L) + ' leg' });
